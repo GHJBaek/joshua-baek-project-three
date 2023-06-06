@@ -1,6 +1,4 @@
 import './App.css';
-import axios from 'axios';
-import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import SearchPlayerForm from './SearchPlayerForm';
 import PlayerStats from './PlayerStats';
