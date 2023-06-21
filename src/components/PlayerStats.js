@@ -1,28 +1,26 @@
+
 import "../App.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
 function PlayerStats() {
-
-    // store api data in state
     const [playerStat, setPlayerStat] = useState([]);
-    // fetch data from API
+    // store the key and direction of the sort
+    const [sortConfig, setSortConfig] = useState({
+        key: "",
+        direction: "",
+    });
+
     useEffect(() => {
-
         axios({
-            url: 'https://ghjbaek.github.io/NBA-API/NBA-API.json',
-            method: 'GET',
-
+            url: "https://ghjbaek.github.io/NBA-API/NBA-API.json",
+            method: "GET",
         }).then((res) => {
-            // update state using the array returned to us from the API
             const playerStatistic = res.data;
             setPlayerStat(playerStatistic);
-
-        })
-
-    }
-        , []);
-
+        });
+    }, []);
+    // handleSort function will determine the direction of the sort
     const handleSort = (key) => {
         let direction = "ascending";
         if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -30,14 +28,12 @@ function PlayerStats() {
         }
         setSortConfig({ key, direction });
     };
-
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: "" });
-
-
+    // sortedData function will sort the data based on the key and direction
     const sortedData = () => {
         const { key, direction } = sortConfig;
+        const sortedPlayerStat = [...playerStat];
         if (key) {
-            return [...playerStat].sort((a, b) => {
+            sortedPlayerStat.sort((a, b) => {
                 if (direction === "ascending") {
                     return a[key] - b[key];
                 } else {
@@ -45,57 +41,64 @@ function PlayerStats() {
                 }
             });
         }
-        return playerStat;
+        return sortedPlayerStat;
     };
 
-    const sortedPlayerStat = sortedData();
+    const renderTableHeader = () => {
+        const headers = [
+            { key: "player", label: "Player" },
+            { key: "pts", label: "Points" },
+            { key: "ast", label: "Assists" },
+            { key: "fg3_pct", label: "3P%" },
+            { key: "fg_pct", label: "FG%" },
+            { key: "ft_pct", label: "FT%" },
+            { key: "blk", label: "Blocks" },
+            { key: "trb", label: "Rebounds" },
+            { key: "stl", label: "Steals" },
+            { key: "season", label: "Season" },
+        ];
 
+        return (
+            <tr>
+                {headers.map((header) => (
+                    <th
+                        key={header.key}
+                        onClick={() => handleSort(header.key)}
+                        className={sortConfig.key === header.key ? sortConfig.direction : ""}
+                    >
+                        {header.label}
+                    </th>
+                ))}
+            </tr>
+        );
+    };
+
+    const renderTableBody = () => {
+        const sortedPlayerStat = sortedData();
+
+        return sortedPlayerStat.map((stats) => (
+            <tr key={stats.playerID}>
+                <td>{stats.player ?? "0"}</td>
+                <td>{stats.pts ?? "0"}</td>
+                <td>{stats.ast ?? "0"}</td>
+                <td>{stats.fg3_pct ?? "-"}</td>
+                <td>{stats.fg_pct ?? "-"}</td>
+                <td>{stats.ft_pct ?? "-"}</td>
+                <td>{stats.blk ?? "0"}</td>
+                <td>{stats.trb ?? "0"}</td>
+                <td>{stats.stl ?? "0"}</td>
+                <td>{stats.season ?? "-"}</td>
+            </tr>
+        ));
+    };
 
     return (
-
-
-
         <div className="PlayerStat">
-
             <table className="player-table">
-                <thead>
-                    <tr>
-                        <th onClick={() => handleSort("player")}>Player</th>
-                        <th onClick={() => handleSort("pts")}>Points</th>
-                        <th onClick={() => handleSort("ast")}>Assists</th>
-                        <th onClick={() => handleSort("fg3_pct")}>3P%</th>
-                        <th onClick={() => handleSort("fg_pct")}>FG%</th>
-                        <th onClick={() => handleSort("ft_pct")}>FT%</th>
-                        <th onClick={() => handleSort("blk")}>Blocks</th>
-                        <th onClick={() => handleSort("trb")}>Rebounds</th>
-                        <th onClick={() => handleSort("stl")}>Steals</th>
-                        <th onClick={() => handleSort("season")}>Season</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {/* map data through columns */}
-                    {playerStat.map((stats) => (
-                        <tr >
-                            <td>{stats.player ?? '0'}</td>
-                            <td>{stats.pts ?? '0'}</td>
-                            <td>{stats.ast ?? '0'}</td>
-                            <td>{stats.fg3_pct ?? '-'}</td>
-                            <td>{stats.fg_pct ?? '-'}</td>
-                            <td>{stats.ft_pct ?? '-'}</td>
-                            <td>{stats.blk ?? '0'}</td>
-                            <td>{stats.trb ?? '0'}</td>
-                            <td>{stats.stl ?? '0'}</td>
-                            <td>{stats.season ?? '-'}</td>
-                        </tr>
-                    ))}
-                </tbody>
+                <thead>{renderTableHeader()}</thead>
+                <tbody>{renderTableBody()}</tbody>
             </table>
-
-
-
-
         </div>
-
     );
 }
 
